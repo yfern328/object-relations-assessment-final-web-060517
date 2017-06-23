@@ -44,13 +44,11 @@ class Movie
   end
 
   def viewers
-    Viewer.all.select {|viewer| viewer.full_name == self}
+    Rating.all.select {|rating| rating.movie == self}.map{|rating| rating.viewer}
   end
 
   def average_rating
-    all_ratings = Rating.all.select {|rating| rating.movie == self}
-    rating_scores = all_ratings.map {|rating| rating.score[0].to_i}
-    average_rating = rating_scores.inject(:+) / rating_scores.length
+    self.ratings.map {|rating| rating.score[0].to_i}.inject(:+) / self.ratings.length.to_f
   end
 
 end
@@ -80,13 +78,8 @@ class Viewer
   end
 
   def create_rating(movie_title, score)
-    if Movie.find_by_title(movie_title) != nil
-      existing_movie = Movie.find_by_title(movie_title)
-      new_rating = Rating.new(existing_movie, self, score)
-    else
-      new_movie = Movie.new(movie_title)
-      new_rating = Rating.new(new_movie, self, score)
-    end
+    new_movie = Movie.find_by_title(movie_title) || Movie.new(movie_title)
+    new_rating = Rating.new(new_movie, self, score)
   end
 
 end
